@@ -8,6 +8,7 @@ Tek instance: ayni anda sadece bir CommonMik calisiyor olabilir.
 import os
 import sys
 import logging
+import logging.handlers
 import json
 import threading
 import ctypes
@@ -32,17 +33,41 @@ def _ensure_single_instance():
         sys.exit(0)
 
 # Logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
-    datefmt="%H:%M:%S",
-)
-logger = logging.getLogger("mik")
-
 # Proje kokunu Python path'e ekle
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
+
+# ── Logging — hem konsol hem dosya ──
+LOG_DIR = os.path.join(os.environ.get("APPDATA", PROJECT_ROOT), "CommonMik")
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOG_DIR, "commonmik.log")
+
+_log_fmt = logging.Formatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s", "%Y-%m-%d %H:%M:%S")
+
+# Dosya handler — son 1MB tutulur, 2 yedek
+_fh = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes=1_000_000, backupCount=2, encoding="utf-8")
+_fh.setLevel(logging.DEBUG)
+_fh.setFormatter(_log_fmt)
+
+# Konsol handler
+_ch = logging.StreamHandler()
+_ch.setLevel(logging.INFO)
+_ch.setFormatter(_log_fmt)
+
+logging.basicConfig(level=logging.DEBUG, handlers=[_fh, _ch])
+logger = logging.getLogger("commonmik")
+
+def _unhandled_exception(exc_type, exc_value, exc_tb):
+    """Yakalanmamis hatalari log dosyasina yaz."""
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+        return
+    logger.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_tb))
+
+sys.excepthook = _unhandled_exception
+
+logger.info(f"Log file: {LOG_FILE}")
 
 from core.audio_engine import AudioEngine
 

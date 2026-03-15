@@ -11,3 +11,11 @@ if getattr(sys, 'frozen', False):
     os.environ['PATH'] = base + os.pathsep + os.environ.get('PATH', '')
     if hasattr(os, 'add_dll_directory'):
         os.add_dll_directory(base)
+
+    # Debug: log dosyasina yaz
+    _log_dir = os.path.join(os.environ.get('APPDATA', base), 'CommonMik')
+    os.makedirs(_log_dir, exist_ok=True)
+    with open(os.path.join(_log_dir, 'rthook.log'), 'w') as f:
+        f.write(f'PYTHONNET_RUNTIME={os.environ.get("PYTHONNET_RUNTIME")}\n')
+        f.write(f'_MEIPASS={base}\n')
+        f.write(f'PATH includes _MEIPASS: {base in os.environ["PATH"]}\n')
