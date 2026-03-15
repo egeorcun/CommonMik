@@ -1,22 +1,41 @@
-"""PyInstaller runtime hook — pythonnet netfx icin Python DLL yolunu ayarla.
+"""PyInstaller runtime hook — pythonnet netfx icin ortam hazirla.
 
-Problem: Frozen exe'de pythonnet (netfx) Python.Runtime.dll'i yuklerken
-python312.dll'i bulamiyor.
+Problem 1: Frozen exe'de pythonnet python312.dll'i bulamiyor.
+Problem 2: Internet'ten indirilen zip dosyalarindan cikan DLL'ler
+           Zone.Identifier ADS ile engelleniyor, .NET Framework yukleyemiyor.
 
-Cozum: PYTHONNET_PYDLL env var ile python312.dll yolunu ver.
-netfx (.NET Framework 4.8) kullanilir — coreclr degil.
+Cozum:
+- _MEIPASS altindaki tum DLL'lerin Zone.Identifier ADS'ini temizle
+- PYTHONNET_PYDLL env var ile python312.dll yolunu ver
 """
 import os
 import sys
 
-# coreclr sorunlu — netfx kullan (varsayilan, mudahale etme)
-# PYTHONNET_RUNTIME'i ayarlamiyoruz, varsayilan 'netfx' kalsin
-for key in ['PYTHONNET_RUNTIME', 'PYTHONNET_CORECLR_DOTNET_ROOT', 
+# netfx kullan (varsayilan)
+for key in ['PYTHONNET_RUNTIME', 'PYTHONNET_CORECLR_DOTNET_ROOT',
             'DOTNET_ROOT', 'PYTHONNET_CORECLR_RUNTIME_CONFIG']:
     os.environ.pop(key, None)
 
+def _unblock_dlls(root):
+    """Internet'ten indirilen DLL'lerin Zone.Identifier ADS'ini sil.
+    Windows .NET Framework bu isaretli DLL'leri yukleyemiyor."""
+    count = 0
+    for dirpath, _, filenames in os.walk(root):
+        for fn in filenames:
+            if fn.lower().endswith('.dll'):
+                ads = os.path.join(dirpath, fn) + ':Zone.Identifier'
+                try:
+                    os.remove(ads)
+                    count += 1
+                except (OSError, FileNotFoundError):
+                    pass
+    return count
+
 if getattr(sys, 'frozen', False):
     base = sys._MEIPASS
+
+    # Zone.Identifier temizle
+    _unblocked = _unblock_dlls(base)
 
     # Python DLL yolunu pythonnet'e bildir
     python_dll = f'python{sys.version_info.major}{sys.version_info.minor}.dll'
@@ -37,3 +56,4 @@ if getattr(sys, 'frozen', False):
         f.write(f'PYTHONNET_PYDLL={os.environ.get("PYTHONNET_PYDLL", "not set")}\n')
         f.write(f'python_dll_exists={os.path.exists(python_dll_path)}\n')
         f.write(f'_MEIPASS={base}\n')
+        f.write(f'unblocked_dlls={_unblocked}\n')
