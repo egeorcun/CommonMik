@@ -461,7 +461,7 @@ def main():
     tray_thread = threading.Thread(target=_create_tray_icon, daemon=True)
     tray_thread.start()
 
-    webview.start(debug=False)
+    webview.start(debug=False, gui='edgechromium')
 
 
 if __name__ == "__main__":
