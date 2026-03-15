@@ -401,11 +401,12 @@ def _create_tray_icon():
             icon.stop()
             if _window:
                 _window.destroy()
+            os._exit(0)
 
         menu = pystray.Menu(
             pystray.MenuItem("Mik Audio", on_show, default=True),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Kapat", on_quit),
+            pystray.MenuItem("Exit", on_quit),
         )
 
         _tray_icon = pystray.Icon("MikAudio", img, "Mik Audio", menu)
