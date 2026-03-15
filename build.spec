@@ -20,7 +20,12 @@ a = Analysis(
     hiddenimports=[
         'webview',
         'webview.platforms.edgechromium',
+        'webview.platforms.winforms',
         'clr_loader',
+        'clr_loader.ffi',
+        'clr_loader.ffi.hostfxr',
+        'clr_loader.netfx',
+        'clr_loader.hostfxr',
         'pythonnet',
         'comtypes',
         'comtypes.stream',
