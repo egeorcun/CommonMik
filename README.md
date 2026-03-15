@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="screenshot.png" alt="Mik Audio" width="500"/>
+  <img src="screenshot.png" alt="CommonMik" width="500"/>
 </p>
 
-<h1 align="center">Mik Audio</h1>
+<h1 align="center">CommonMik</h1>
 
 <p align="center">
   Per-application audio mixer for Windows
@@ -32,11 +32,11 @@ Capture audio from specific apps (Spotify, Chrome, games), mix with your microph
 
 ```
 Spotify  ───────┐
-Chrome   ───────┤──→  Mik Audio  ──→  CABLE Input  ──→  Discord mic input
+Chrome   ───────┤──→  CommonMik  ──→  CABLE Input  ──→  Discord mic input
 Your mic ───────┘      (mixer)        (virtual cable)    (CABLE Output)
 ```
 
-Windows audio output stays on your headphones — Mik Audio captures app audio via WASAPI Process Loopback without redirecting system output.
+Windows audio output stays on your headphones — CommonMik captures app audio via WASAPI Process Loopback without redirecting system output.
 
 ## Requirements
 
@@ -49,7 +49,7 @@ Windows audio output stays on your headphones — Mik Audio captures app audio v
 
 1. Download the latest release from [Releases](https://github.com/egeorcun/CommonMik/releases)
 2. Install [VB-Audio Virtual Cable](https://vb-audio.com/Cable/)
-3. Run `MikAudio.exe`
+3. Run `CommonMik.exe`
 
 ### From Source
 
@@ -65,7 +65,7 @@ python main.py
 ```bash
 pip install -r requirements.txt
 pyinstaller build.spec
-# Output: dist/MikAudio/MikAudio.exe
+# Output: dist/CommonMik/CommonMik.exe
 ```
 
 ## Usage

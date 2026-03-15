@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   MIK AUDIO — Dark Industrial Interface
+   COMMONMIK — Dark Industrial Interface
    Aesthetic: Refined dark, subtle gradients, 
    neon accent pulses, glass morphism cards
    ═══════════════════════════════════════════════════ */
@@ -150,8 +150,8 @@ body {
 .logo-text {
     font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
-    font-size: 1.3rem;
-    letter-spacing: 4px;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
     background: linear-gradient(135deg, var(--accent-bright), var(--green));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

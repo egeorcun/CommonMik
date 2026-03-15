@@ -1,8 +1,8 @@
 """
-Mik Audio — Ana giris noktasi.
+CommonMik — Ana giris noktasi.
 
 pywebview native pencere + system tray + Python ses motoru.
-Tek instance: ayni anda sadece bir MikAudio calisiyor olabilir.
+Tek instance: ayni anda sadece bir CommonMik calisiyor olabilir.
 """
 
 import os
@@ -19,11 +19,11 @@ def _ensure_single_instance():
     """Ayni anda sadece bir instance calismasini saglar."""
     global _mutex
     kernel32 = ctypes.windll.kernel32
-    _mutex = kernel32.CreateMutexW(None, True, "MikAudio_SingleInstance_Mutex")
+    _mutex = kernel32.CreateMutexW(None, True, "CommonMik_SingleInstance_Mutex")
     if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
         # Zaten calisiyor — mevcut pencereyi one getirmeyi dene
         try:
-            hwnd = ctypes.windll.user32.FindWindowW(None, "Mik Audio")
+            hwnd = ctypes.windll.user32.FindWindowW(None, "CommonMik")
             if hwnd:
                 ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
                 ctypes.windll.user32.SetForegroundWindow(hwnd)
@@ -50,7 +50,7 @@ from core.audio_engine import AudioEngine
 engine = AudioEngine()
 
 # ── Settings path ──
-SETTINGS_DIR = os.path.join(os.environ.get("APPDATA", PROJECT_ROOT), "MikAudio")
+SETTINGS_DIR = os.path.join(os.environ.get("APPDATA", PROJECT_ROOT), "CommonMik")
 SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 
 
@@ -404,12 +404,12 @@ def _create_tray_icon():
             os._exit(0)
 
         menu = pystray.Menu(
-            pystray.MenuItem("Mik Audio", on_show, default=True),
+            pystray.MenuItem("CommonMik", on_show, default=True),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("Exit", on_quit),
         )
 
-        _tray_icon = pystray.Icon("MikAudio", img, "Mik Audio", menu)
+        _tray_icon = pystray.Icon("CommonMik", img, "CommonMik", menu)
         _tray_icon.run()
     except Exception as e:
         logger.error(f"Tray icon error: {e}")
@@ -439,12 +439,12 @@ def main():
     ui_dir = os.path.join(base_dir, "ui")
     index_path = os.path.join(ui_dir, "index.html")
 
-    logger.info("Mik Audio starting...")
+    logger.info("CommonMik starting...")
 
     api = Api()
 
     _window = webview.create_window(
-        "Mik Audio",
+        "CommonMik",
         url=index_path,
         js_api=api,
         width=520,

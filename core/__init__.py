@@ -1,1 +1,1 @@
-"""Mik Audio — Core modülü."""
+"""CommonMik — Core modülü."""

@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-Mik Audio — PyInstaller build spec.
+CommonMik — PyInstaller build spec.
 
 Kullanim:
     pyinstaller build.spec
@@ -53,7 +53,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='MikAudio',
+    name='CommonMik',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -71,5 +71,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='MikAudio',
+    name='CommonMik',
 )

@@ -1,5 +1,5 @@
 """
-Mik Audio — Ses motoru cekirdegi.
+CommonMik — Ses motoru cekirdegi.
 
 WASAPI uzerinden uygulama bazli ses yakalama, mikrofon girisi,
 karistirma ve sanal cihaza cikis.

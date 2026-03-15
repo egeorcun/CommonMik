@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   MIK AUDIO — Frontend Controller
+   COMMONMIK — Frontend Controller
    pywebview JS API bridge + UI logic
    ═══════════════════════════════════════════════════ */
 
@@ -192,7 +192,7 @@ async function init() {
     await loadDevices();
     bindEvents();
     await restoreSettings();
-    console.log('Mik Audio UI initialized');
+    console.log('CommonMik UI initialized');
 }
 
 // ── Auto-save (debounced) ──

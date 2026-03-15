@@ -26,6 +26,8 @@ dist2/
 dist3/
 dist4/
 build/
+*.zip
+*.tar.gz
 __pycache__/
 *.pyc
 *.pyd
