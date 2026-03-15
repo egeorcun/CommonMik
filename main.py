@@ -23,7 +23,6 @@ def _ensure_single_instance():
     if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
         # Zaten calisiyor — mevcut pencereyi one getirmeyi dene
         try:
-            import ctypes
             hwnd = ctypes.windll.user32.FindWindowW(None, "Mik Audio")
             if hwnd:
                 ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
