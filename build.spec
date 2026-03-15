@@ -39,7 +39,7 @@ a = Analysis(
     ],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['hooks/rthook_pythonnet.py'],
     excludes=[
         'tkinter',
     ],
