@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script type="text/javascript" src="/eel.js"></script>
     <div class="app" id="app">
         <!-- Header -->
         <header class="header">
@@ -27,9 +26,12 @@
             <div class="header-right">
                 <div class="status-indicator" id="statusIndicator">
                     <span class="status-dot"></span>
-                    <span class="status-text">Bekleniyor</span>
+                    <span class="status-text" data-i18n="status_idle">Idle</span>
                 </div>
-                <button class="btn-icon" id="btnSettings" title="Ayarlar">
+                <button class="btn-icon btn-lang" id="btnLang" title="Language">
+                    <span id="langLabel">EN</span>
+                </button>
+                <button class="btn-icon" id="btnSettings" title="Settings">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"/>
                         <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
@@ -43,16 +45,15 @@
             <!-- Output Device Section -->
             <section class="section output-section" id="outputSection">
                 <div class="section-header">
-                    <h2>Sanal Mikrofon Çıkışı</h2>
+                    <h2 data-i18n="output_title">Virtual Microphone Output</h2>
                     <span class="badge">OUTPUT</span>
                 </div>
-                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;">
-                    Karıştırılmış ses buraya yazılır. Discord'da bu cihazı mikrofon olarak seçin.
-                    <br>Windows ses çıkışınızı (kulaklık) değiştirmeyin.
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="output_desc">
+                    Mixed audio is sent here. Select this device as microphone in Discord.
                 </p>
                 <div class="device-selector">
                     <select id="outputDeviceSelect" class="select">
-                        <option value="">Cihaz seçin...</option>
+                        <option value="" data-i18n="select_device">Select device...</option>
                     </select>
                 </div>
             </section>
@@ -60,18 +61,17 @@
             <!-- Sources Section -->
             <section class="section sources-section">
                 <div class="section-header">
-                    <h2>Ses Kaynakları</h2>
+                    <h2 data-i18n="sources_title">Audio Sources</h2>
                     <button class="btn btn-primary btn-sm" id="btnAddSource">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
                         </svg>
-                        Kaynak Ekle
+                        <span data-i18n="add_source">Add Source</span>
                     </button>
                 </div>
 
                 <div class="sources-list" id="sourcesList">
-                    <!-- Kaynaklar buraya dinamik olarak eklenir -->
                     <div class="empty-state" id="emptyState">
                         <div class="empty-icon">
                             <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
@@ -80,8 +80,8 @@
                                 <line x1="24" y1="36" x2="24" y2="44"/>
                             </svg>
                         </div>
-                        <p>Henüz ses kaynağı eklenmedi</p>
-                        <p class="empty-hint">Mikrofon veya sistem sesi ekleyerek başlayın</p>
+                        <p data-i18n="empty_title">No audio sources added</p>
+                        <p class="empty-hint" data-i18n="empty_hint">Add a microphone or app audio to get started</p>
                     </div>
                 </div>
             </section>
@@ -110,7 +110,7 @@
                         <path d="M18.36 6.64a9 9 0 11-12.73 0"/>
                         <line x1="12" y1="2" x2="12" y2="12"/>
                     </svg>
-                    <span>Başlat</span>
+                    <span data-i18n="btn_start">Start</span>
                 </button>
             </div>
         </main>
@@ -119,7 +119,7 @@
         <div class="modal-overlay" id="addSourceModal">
             <div class="modal">
                 <div class="modal-header">
-                    <h3>Kaynak Ekle</h3>
+                    <h3 data-i18n="modal_add_source">Add Source</h3>
                     <button class="btn-icon btn-close" id="btnCloseModal">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -135,18 +135,17 @@
                                 <path d="M4 12a8 8 0 0016 0"/>
                                 <line x1="12" y1="20" x2="12" y2="24"/>
                             </svg>
-                            Mikrofon
+                            <span data-i18n="tab_microphone">Microphone</span>
                         </button>
                         <button class="tab" data-type="loopback">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                                 <path d="M3 18v-6a9 9 0 0118 0v6"/>
                                 <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
                             </svg>
-                            Sistem Sesi
+                            <span data-i18n="tab_app_audio">App Audio</span>
                         </button>
                     </div>
                     <div class="device-list" id="modalDeviceList">
-                        <!-- Cihazlar buraya gelir -->
                     </div>
                 </div>
             </div>
@@ -156,7 +155,7 @@
         <div class="modal-overlay" id="settingsModal">
             <div class="modal">
                 <div class="modal-header">
-                    <h3>Ayarlar</h3>
+                    <h3 data-i18n="settings_title">Settings</h3>
                     <button class="btn-icon btn-close" id="btnCloseSettings">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -166,17 +165,17 @@
                 </div>
                 <div class="modal-body">
                     <div class="setting-group">
-                        <label class="setting-label">Sanal Cihaz İsmi</label>
-                        <p class="setting-desc">Windows'ta görünecek mikrofon ismi</p>
+                        <label class="setting-label" data-i18n="setting_device_name">Virtual Device Name</label>
+                        <p class="setting-desc" data-i18n="setting_device_desc">Microphone name shown in Windows</p>
                         <div class="setting-row">
                             <input type="text" class="input" id="deviceNameInput" 
                                    placeholder="Mik Audio" value="Mik Audio" />
-                            <button class="btn btn-primary btn-sm" id="btnRenameDevice">Uygula</button>
+                            <button class="btn btn-primary btn-sm" id="btnRenameDevice" data-i18n="btn_apply">Apply</button>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Hedef Cihaz</label>
-                        <p class="setting-desc">İsmi değiştirilecek sanal ses cihazı</p>
+                        <label class="setting-label" data-i18n="setting_target">Target Device</label>
+                        <p class="setting-desc" data-i18n="setting_target_desc">Virtual audio device to rename</p>
                         <select id="renameTargetSelect" class="select">
                             <option value="VB-Audio Virtual Cable">VB-Audio Virtual Cable</option>
                             <option value="Voicemod">Voicemod Virtual Audio</option>

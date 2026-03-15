@@ -2,6 +2,7 @@
 Mik Audio — Ana giris noktasi.
 
 pywebview native pencere + system tray + Python ses motoru.
+Tek instance: ayni anda sadece bir MikAudio calisiyor olabilir.
 """
 
 import os
@@ -9,6 +10,27 @@ import sys
 import logging
 import json
 import threading
+import ctypes
+
+# ── Single instance mutex ──
+_mutex = None
+
+def _ensure_single_instance():
+    """Ayni anda sadece bir instance calismasini saglar."""
+    global _mutex
+    kernel32 = ctypes.windll.kernel32
+    _mutex = kernel32.CreateMutexW(None, True, "MikAudio_SingleInstance_Mutex")
+    if kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+        # Zaten calisiyor — mevcut pencereyi one getirmeyi dene
+        try:
+            import ctypes
+            hwnd = ctypes.windll.user32.FindWindowW(None, "Mik Audio")
+            if hwnd:
+                ctypes.windll.user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+                ctypes.windll.user32.SetForegroundWindow(hwnd)
+        except Exception:
+            pass
+        sys.exit(0)
 
 # Logging
 logging.basicConfig(
@@ -210,15 +232,29 @@ class Api:
                     entry["exe_name"] = src.name + ".exe"
                 sources.append(entry)
 
+            # Mevcut ayarlari oku (lang korumak icin)
+            existing = _load_settings() or {}
+
             settings = {
                 "output_device_name": output_name,
                 "master_volume": engine.master_volume,
                 "sources": sources,
+                "lang": existing.get("lang", "en"),
             }
             _save_settings(settings)
             return {"ok": True}
         except Exception as e:
             logger.error(f"save_settings: {e}")
+            return {"ok": False, "error": str(e)}
+
+    def save_lang(self, lang):
+        """Dil tercihini kaydeder."""
+        try:
+            settings = _load_settings() or {}
+            settings["lang"] = lang
+            _save_settings(settings)
+            return {"ok": True}
+        except Exception as e:
             return {"ok": False, "error": str(e)}
 
     def load_settings(self):
@@ -234,6 +270,7 @@ class Api:
                 "output_device_index": None,
                 "output_device_name": settings.get("output_device_name", ""),
                 "master_volume": settings.get("master_volume", 1.0),
+                "lang": settings.get("lang", "en"),
                 "sources": [],
             }
 
@@ -391,6 +428,7 @@ def _on_closing():
 
 def main():
     global _window
+    _ensure_single_instance()
     import webview
 
     if getattr(sys, 'frozen', False):

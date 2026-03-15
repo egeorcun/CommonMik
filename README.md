@@ -1,6 +1,18 @@
-# Mik Audio
+<p align="center">
+  <img src="screenshot.png" alt="Mik Audio" width="500"/>
+</p>
 
-Per-application audio mixer for Windows. Capture audio from specific apps (Spotify, Chrome, games), mix with your microphone, and output to a virtual microphone for Discord, Zoom, or any voice chat.
+<h1 align="center">Mik Audio</h1>
+
+<p align="center">
+  Per-application audio mixer for Windows
+  <br/>
+  <a href="README_TR.md">🇹🇷 Türkçe</a>
+</p>
+
+---
+
+Capture audio from specific apps (Spotify, Chrome, games), mix with your microphone, and output to a virtual microphone for Discord, Zoom, or any voice chat.
 
 ## Features
 
@@ -12,6 +24,7 @@ Per-application audio mixer for Windows. Capture audio from specific apps (Spoti
 - **Sinc resampling** — High-quality polyphase FIR resampling when sample rates differ
 - **System tray** — Minimize to tray, keeps running in background
 - **Auto-save settings** — Output device, sources, volumes, mute states persist across sessions
+- **Multi-language** — English and Turkish UI
 - **Native Windows app** — Uses WebView2 (Edge Chromium), no browser dependency
 - **Dark theme UI** — Glassmorphism design with real-time audio meters
 
@@ -42,7 +55,7 @@ Windows audio output stays on your headphones — Mik Audio captures app audio v
 
 ```bash
 git clone https://github.com/egeorcun/CommonMik.git
-cd mik-audio
+cd CommonMik
 pip install -r requirements.txt
 python main.py
 ```
@@ -57,16 +70,16 @@ pyinstaller build.spec
 
 ## Usage
 
-1. **Select output device** — Choose `CABLE Input (VB-Audio Virtual Cable) [WASAPI]` as the virtual microphone output
+1. **Select output device** — Choose `CABLE Input (VB-Audio Virtual Cable) [WASAPI]`
 2. **Add sources** — Click ➕ to add your microphone and/or application audio
 3. **Start engine** — Click the Start button
 4. **In Discord** — Set your input device to `CABLE Output (VB-Audio Virtual Cable)`
 
 ### Tips
 
-- Keep all volumes at **100% (1.0)** for cleanest signal — adjust volume at source (Spotify) or destination (Discord)
+- Keep all volumes at **100%** for cleanest signal — adjust at source (Spotify) or destination (Discord)
 - Always select **WASAPI** devices for lowest latency and best quality
-- Close the window to minimize to system tray — right-click tray icon to fully quit
+- Close the window to minimize to system tray — right-click tray icon to quit
 
 ## Architecture
 
@@ -81,84 +94,6 @@ ui/
 main.py            — pywebview window + system tray + Python↔JS API
 ```
 
-**Audio pipeline:** 48kHz float32 stereo throughout. Per-app capture via `ActivateAudioInterfaceAsync` COM API. Thread-safe FIFO ring buffers between capture threads and output callback. Sinc resampling (scipy `resample_poly`) when device sample rates differ.
-
 ## License
-
-MIT
-
----
-
-# Mik Audio (Türkçe)
-
-Windows için uygulama bazlı ses karıştırıcı. Spotify, Chrome, oyun gibi uygulamaların sesini yakalar, mikrofonunla karıştırır ve Discord/Zoom'da sanal mikrofon olarak kullanmanı sağlar.
-
-## Özellikler
-
-- **Uygulama bazlı ses yakalama** — Hangi uygulamaların sesini alacağını sen seçersin (WASAPI Process Loopback)
-- **Mikrofon karıştırma** — Mikrofon + uygulama sesleri tek sanal mikrofona birleştirilir
-- **Bağımsız ses kontrolleri** — Her kaynağın sesini ayrı ayrı ayarla, gerçek zamanlı seviye göstergesi
-- **Sanal mikrofon çıkışı** — VB-Audio Virtual Cable üzerinden çalışır
-- **WASAPI modu** — 48kHz native pipeline, sıfır resampling
-- **Sinc resampling** — Farklı sample rate'lerde yüksek kaliteli dönüşüm
-- **Sistem tepsisi** — Pencereyi kapat, arka planda çalışmaya devam etsin
-- **Otomatik ayar kaydetme** — Çıkış cihazı, kaynaklar, ses seviyeleri otomatik kaydedilir
-- **Native Windows uygulaması** — WebView2 kullanır, tarayıcı gerekmez
-- **Koyu tema arayüz** — Glassmorphism tasarım, gerçek zamanlı ses metre
-
-## Nasıl Çalışır
-
-```
-Spotify  ───────┐
-Chrome   ───────┤──→  Mik Audio  ──→  CABLE Input  ──→  Discord mikrofon
-Mikrofon ───────┘     (karıştırıcı)   (sanal kablo)     (CABLE Output seç)
-```
-
-Windows ses çıkışın kulaklığında kalır — Mik Audio, uygulamaların sesini WASAPI ile yakalar, sistem çıkışını değiştirmez.
-
-## Gereksinimler
-
-- Windows 10 sürüm 2004+ / Windows 11
-- [VB-Audio Virtual Cable](https://vb-audio.com/Cable/) (ücretsiz)
-
-## Kurulum
-
-### Hazır Exe (Önerilen)
-
-1. [Releases](https://github.com/egeorcun/CommonMik/releases) sayfasından son sürümü indir
-2. [VB-Audio Virtual Cable](https://vb-audio.com/Cable/) kur
-3. `MikAudio.exe` çalıştır
-
-### Kaynak Koddan
-
-```bash
-git clone https://github.com/egeorcun/CommonMik.git
-cd mik-audio
-pip install -r requirements.txt
-python main.py
-```
-
-### Exe Derleme
-
-```bash
-pip install -r requirements.txt
-pyinstaller build.spec
-# Çıktı: dist/MikAudio/MikAudio.exe
-```
-
-## Kullanım
-
-1. **Çıkış cihazı seç** — `CABLE Input (VB-Audio Virtual Cable) [WASAPI]` seç
-2. **Kaynak ekle** — ➕ butonuna bas, mikrofon ve/veya uygulama ekle
-3. **Motoru başlat** — Başlat butonuna bas
-4. **Discord'da** — Giriş cihazı olarak `CABLE Output (VB-Audio Virtual Cable)` seç
-
-### İpuçları
-
-- Tüm ses seviyelerini **%100 (1.0)** tut — en temiz sinyal. Sesi kaynakta (Spotify) veya hedefte (Discord) ayarla
-- Her zaman **WASAPI** cihazlarını seç — en düşük gecikme, en iyi kalite
-- Pencereyi kapatmak uygulamayı kapatmaz — sistem tepsisine küçülür. Tamamen kapatmak için tray ikonuna sağ tıkla → Kapat
-
-## Lisans
 
 MIT

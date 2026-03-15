@@ -223,6 +223,19 @@ body {
     border-color: var(--border-accent);
 }
 
+.btn-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    border-color: var(--accent-dim, rgba(139, 92, 246, 0.3));
+}
+
+.btn-lang:hover {
+    background: rgba(139, 92, 246, 0.15);
+}
+
 .btn {
     display: inline-flex;
     align-items: center;

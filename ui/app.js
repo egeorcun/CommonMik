@@ -3,6 +3,131 @@
    pywebview JS API bridge + UI logic
    ═══════════════════════════════════════════════════ */
 
+// ── i18n ──
+const LANGS = {
+    en: {
+        status_idle: 'Idle',
+        status_active: 'Active',
+        output_title: 'Virtual Microphone Output',
+        output_desc: 'Mixed audio is sent here. Select this device as microphone in Discord.',
+        select_device: 'Select device...',
+        sources_title: 'Audio Sources',
+        add_source: 'Add Source',
+        empty_title: 'No audio sources added',
+        empty_hint: 'Add a microphone or app audio to get started',
+        btn_start: 'Start',
+        btn_stop: 'Stop',
+        modal_add_source: 'Add Source',
+        tab_microphone: 'Microphone',
+        tab_app_audio: 'App Audio',
+        settings_title: 'Settings',
+        setting_device_name: 'Virtual Device Name',
+        setting_device_desc: 'Microphone name shown in Windows',
+        btn_apply: 'Apply',
+        setting_target: 'Target Device',
+        setting_target_desc: 'Virtual audio device to rename',
+        // Dynamic strings
+        type_microphone: 'microphone',
+        type_app: 'app audio',
+        toast_added: '{name} added',
+        toast_removed: 'Source removed',
+        toast_output_set: 'Output device set',
+        toast_engine_started: 'Engine started',
+        toast_engine_stopped: 'Engine stopped',
+        toast_settings_restored: 'Settings restored',
+        toast_select_output: 'Please select an output device',
+        toast_source_failed: 'Could not add source',
+        toast_enter_name: 'Please enter a name',
+        toast_renamed: 'Device renamed to "{name}"',
+        toast_rename_failed: 'Could not rename device',
+        no_apps_found: 'No audio apps found',
+        refresh_list: '🔄 Refresh List',
+        no_device_found: 'No device found',
+    },
+    tr: {
+        status_idle: 'Bekleniyor',
+        status_active: 'Aktif',
+        output_title: 'Sanal Mikrofon Çıkışı',
+        output_desc: 'Karıştırılmış ses buraya yazılır. Discord\'da bu cihazı mikrofon olarak seçin.',
+        select_device: 'Cihaz seçin...',
+        sources_title: 'Ses Kaynakları',
+        add_source: 'Kaynak Ekle',
+        empty_title: 'Henüz ses kaynağı eklenmedi',
+        empty_hint: 'Mikrofon veya uygulama sesi ekleyerek başlayın',
+        btn_start: 'Başlat',
+        btn_stop: 'Durdur',
+        modal_add_source: 'Kaynak Ekle',
+        tab_microphone: 'Mikrofon',
+        tab_app_audio: 'Uygulama Sesi',
+        settings_title: 'Ayarlar',
+        setting_device_name: 'Sanal Cihaz İsmi',
+        setting_device_desc: 'Windows\'ta görünecek mikrofon ismi',
+        btn_apply: 'Uygula',
+        setting_target: 'Hedef Cihaz',
+        setting_target_desc: 'İsmi değiştirilecek sanal ses cihazı',
+        type_microphone: 'mikrofon',
+        type_app: 'uygulama sesi',
+        toast_added: '{name} eklendi',
+        toast_removed: 'Kaynak kaldırıldı',
+        toast_output_set: 'Çıkış cihazı ayarlandı',
+        toast_engine_started: 'Motor başlatıldı',
+        toast_engine_stopped: 'Motor durduruldu',
+        toast_settings_restored: 'Ayarlar geri yüklendi',
+        toast_select_output: 'Lütfen bir çıkış cihazı seçin',
+        toast_source_failed: 'Kaynak eklenemedi',
+        toast_enter_name: 'Lütfen bir isim girin',
+        toast_renamed: 'Cihaz ismi "{name}" olarak değiştirildi',
+        toast_rename_failed: 'İsim değiştirilemedi',
+        no_apps_found: 'Ses çalan uygulama bulunamadı',
+        refresh_list: '🔄 Listeyi Yenile',
+        no_device_found: 'Cihaz bulunamadı',
+    },
+};
+
+let currentLang = localStorage.getItem('mik_lang') || 'en';
+
+function t(key, params = {}) {
+    let str = LANGS[currentLang]?.[key] || LANGS.en[key] || key;
+    for (const [k, v] of Object.entries(params)) {
+        str = str.replace(`{${k}}`, v);
+    }
+    return str;
+}
+
+function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const text = t(key);
+        if (el.tagName === 'OPTION') {
+            el.textContent = text;
+        } else if (el.tagName === 'INPUT') {
+            el.placeholder = text;
+        } else {
+            el.textContent = text;
+        }
+    });
+    document.getElementById('langLabel').textContent = currentLang.toUpperCase();
+}
+
+function toggleLang() {
+    currentLang = currentLang === 'en' ? 'tr' : 'en';
+    localStorage.setItem('mik_lang', currentLang);
+    applyI18n();
+    // Update dynamic engine button text
+    const btnSpan = dom.btnToggleEngine.querySelector('span');
+    if (btnSpan) {
+        btnSpan.textContent = state.engineRunning ? t('btn_stop') : t('btn_start');
+    }
+    // Update status text
+    const statusText = dom.statusIndicator.querySelector('.status-text');
+    if (statusText) {
+        statusText.textContent = state.engineRunning ? t('status_active') : t('status_idle');
+    }
+    // Re-render source cards with new language
+    renderSources(true);
+    autoSave();
+}
+
 // ── State ──
 const state = {
     engineRunning: false,
@@ -63,6 +188,7 @@ function toast(message, type = 'success') {
 
 // ── Initialize ──
 async function init() {
+    applyI18n();
     await loadDevices();
     bindEvents();
     await restoreSettings();
@@ -74,7 +200,11 @@ let _saveTimer = null;
 function autoSave() {
     if (_saveTimer) clearTimeout(_saveTimer);
     _saveTimer = setTimeout(async () => {
-        try { await api().save_settings(); } catch (e) { /* silent */ }
+        try {
+            await api().save_settings();
+            // Save lang preference alongside
+            try { await api().save_lang(currentLang); } catch(e) {}
+        } catch (e) { /* silent */ }
     }, 1000);
 }
 
@@ -83,6 +213,13 @@ async function restoreSettings() {
     try {
         const saved = await api().load_settings();
         if (!saved || !saved.ok) return;
+
+        // Dil tercihi
+        if (saved.lang) {
+            currentLang = saved.lang;
+            localStorage.setItem('mik_lang', currentLang);
+            applyI18n();
+        }
 
         // Çıkış cihazı
         if (saved.output_device_index !== null) {
@@ -151,7 +288,7 @@ async function restoreSettings() {
                 }
             }
 
-            toast('Ayarlar geri yüklendi');
+            toast(t('toast_settings_restored'));
         }
     } catch (e) {
         console.error('restoreSettings error:', e);
@@ -212,14 +349,14 @@ async function loadModalDevices(type) {
             } else {
                 const empty = document.createElement('div');
                 empty.style.cssText = 'padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem;';
-                empty.textContent = 'Ses çalan uygulama bulunamadı';
+                empty.textContent = t('no_apps_found');
                 dom.modalDeviceList.appendChild(empty);
             }
 
             const refresh = document.createElement('div');
             refresh.className = 'device-item';
             refresh.style.cssText = 'justify-content: center; opacity: 0.7; margin-top: 8px;';
-            refresh.innerHTML = '<span class="device-item-name">🔄 Listeyi Yenile</span>';
+            refresh.innerHTML = `<span class="device-item-name">${t('refresh_list')}</span>`;
             refresh.addEventListener('click', () => loadModalDevices('loopback'));
             dom.modalDeviceList.appendChild(refresh);
             return;
@@ -230,7 +367,7 @@ async function loadModalDevices(type) {
         if (!devices || devices.length === 0) {
             dom.modalDeviceList.innerHTML = `
                 <div class="empty-state" style="padding: 20px;">
-                    <p>Cihaz bulunamadı</p>
+                    <p>${t('no_device_found')}</p>
                 </div>`;
             return;
         }
@@ -270,13 +407,13 @@ async function addSource(type, device) {
             };
             renderSources();
             closeModal('addSourceModal');
-            toast(`${device.name} eklendi`);
+            toast(t('toast_added', {name: device.name}));
             autoSave();
         } else {
-            toast(result?.error || 'Kaynak eklenemedi', 'error');
+            toast(result?.error || t('toast_source_failed'), 'error');
         }
     } catch (e) {
-        toast('Kaynak eklenemedi: ' + e.message, 'error');
+        toast(t('toast_source_failed') + ': ' + e.message, 'error');
     }
 }
 
@@ -291,12 +428,12 @@ async function removeSource(sourceId) {
     await api().remove_source(sourceId);
     delete state.sources[sourceId];
     renderSources();
-    toast('Kaynak kaldırıldı');
+    toast(t('toast_removed'));
     autoSave();
 }
 
 // ── Render Sources ──
-function renderSources() {
+function renderSources(forceRebuild = false) {
     const ids = Object.keys(state.sources);
 
     if (ids.length === 0) {
@@ -307,11 +444,15 @@ function renderSources() {
 
     dom.emptyState.style.display = 'none';
 
-    dom.sourcesList.querySelectorAll('.source-card').forEach(el => {
-        if (!state.sources[el.dataset.sourceId]) {
-            el.remove();
-        }
-    });
+    if (forceRebuild) {
+        dom.sourcesList.querySelectorAll('.source-card').forEach(el => el.remove());
+    } else {
+        dom.sourcesList.querySelectorAll('.source-card').forEach(el => {
+            if (!state.sources[el.dataset.sourceId]) {
+                el.remove();
+            }
+        });
+    }
 
     ids.forEach(id => {
         let card = dom.sourcesList.querySelector(`[data-source-id="${id}"]`);
@@ -345,7 +486,7 @@ function createSourceCard(source) {
         <div class="source-icon ${iconClass}">${iconSvg}</div>
         <div class="source-info">
             <div class="source-name">${source.name}</div>
-            <div class="source-type">${isMic ? 'mikrofon' : 'uygulama sesi'}</div>
+            <div class="source-type">${isMic ? t('type_microphone') : t('type_app')}</div>
         </div>
         <div class="source-meter">
             <div class="meter-bar">
@@ -473,11 +614,11 @@ async function toggleEngine() {
                 dom.statusIndicator.classList.remove('active');
                 dom.statusIndicator.querySelector('.status-text').textContent = 'Bekleniyor';
                 stopLevelPolling();
-                toast('Motor durduruldu');
+                toast(t('toast_engine_stopped'));
             }
         } else {
             if (!dom.outputSelect.value) {
-                toast('Lütfen bir çıkış cihazı seçin', 'error');
+                toast(t('toast_select_output'), 'error');
                 return;
             }
 
@@ -489,13 +630,13 @@ async function toggleEngine() {
                 dom.statusIndicator.classList.add('active');
                 dom.statusIndicator.querySelector('.status-text').textContent = 'Aktif';
                 startLevelPolling();
-                toast('Motor başlatıldı');
+                toast(t('toast_engine_started'));
             } else {
-                toast(result?.error || 'Motor başlatılamadı', 'error');
+                toast(result?.error || t('toast_source_failed'), 'error');
             }
         }
     } catch (e) {
-        toast('Motor hatası: ' + e.message, 'error');
+        toast(e.message, 'error');
     }
 }
 
@@ -511,11 +652,12 @@ function closeModal(id) {
 // ── Event Bindings ──
 function bindEvents() {
     dom.btnToggleEngine.addEventListener('click', toggleEngine);
+    document.getElementById('btnLang').addEventListener('click', toggleLang);
 
     dom.outputSelect.addEventListener('change', async () => {
         if (dom.outputSelect.value) {
             await api().set_output_device(parseInt(dom.outputSelect.value));
-            toast('Çıkış cihazı ayarlandı');
+            toast(t('toast_output_set'));
             autoSave();
         }
     });
@@ -550,18 +692,18 @@ function bindEvents() {
         const newName = dom.deviceNameInput.value.trim();
         const target = dom.renameTargetSelect.value;
         if (!newName) {
-            toast('Lütfen bir isim girin', 'error');
+            toast(t('toast_enter_name'), 'error');
             return;
         }
         try {
             const result = await api().rename_audio_device(target, newName);
             if (result?.ok) {
-                toast(`Cihaz ismi "${newName}" olarak değiştirildi`);
+                toast(t('toast_renamed', {name: newName}));
             } else {
-                toast(result?.error || 'İsim değiştirilemedi', 'error');
+                toast(result?.error || t('toast_rename_failed'), 'error');
             }
         } catch (e) {
-            toast('Hata: ' + e.message, 'error');
+            toast(e.message, 'error');
         }
     });
 
